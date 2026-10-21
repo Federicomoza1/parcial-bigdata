@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airline Reservation System - Customer Portal</title>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --success: #059669;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header a { color: #93c5fd; text-decoration: none; font-weight: 500; }
+    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    h2 { margin-top: 0; font-size: 1.25rem; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      align-items: end;
+    }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 0.35rem; }
+    input, select {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.65rem 1.2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: var(--accent-hover); }
+    .flight-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 0.75rem;
+      background: #fff;
+    }
+    .flight-info { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+    .badge {
+      background: #eff6ff;
+      color: var(--accent);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .hidden { display: none !important; }
+    .confirmation-box {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      padding: 1.25rem;
+      border-radius: 8px;
+    }
+    .confirmation-id-badge {
+      font-family: monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+    .error-msg { color: var(--danger); margin-top: 0.75rem; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>AeroAndes</strong> | Flight Reservations</div>
+    <nav><a href="/manager">Manager Analytics Panel &rarr;</a></nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Search Flights</h2>
+      <div class="form-grid">
+        <div>
+          <label for="search-origin">Origin (IATA)</label>
+          <input id="search-origin" data-testid="search-origin" type="text" placeholder="BOG" />
+        </div>
+        <div>
+          <label for="search-destination">Destination (IATA)</label>
+          <input id="search-destination" data-testid="search-destination" type="text" placeholder="MDE" />
+        </div>
+        <div>
+          <label for="search-date">Flight Date (YYYY-MM-DD)</label>
+          <input id="search-date" data-testid="search-date" type="text" placeholder="2031-05-20" />
+        </div>
+        <div>
+          <button id="search-submit" data-testid="search-submit" type="button">Search Flights</button>
+        </div>
+      </div>
+      <div id="search-error" class="error-msg hidden"></div>
+    </div>
+
+    <div id="results-section" class="card hidden">
+      <h2>Available Flights</h2>
+      <div id="flights-container"></div>
+    </div>
+
+    <div id="booking-section" class="card hidden">
+      <h2>Complete Your Reservation</h2>
+      <p id="selected-flight-label" style="color: var(--muted); margin-top: 0;"></p>
+      <div class="form-grid">
+        <div>
+          <label for="passenger-name">Passenger Full Name</label>
+          <input id="passenger-name" data-testid="passenger-name" type="text" placeholder="Jane Doe" />
+        </div>
+        <div>
+          <label for="fare-class">Fare Class</label>
+          <select id="fare-class">
+            <option value="ECONOMY">ECONOMY</option>
+            <option value="BUSINESS">BUSINESS</option>
+          </select>
+        </div>
+        <div>
+          <button id="confirm-submit" data-testid="confirm-submit" type="button">Confirm Reservation</button>
+        </div>
+      </div>
+      <div id="booking-error" class="error-msg hidden"></div>
+    </div>
+
+    <div id="confirmation-section" class="card hidden">
+      <div class="confirmation-box">
+        <h2 style="margin-bottom: 0.5rem;">Reservation Confirmed!</h2>
+        <p style="margin: 0.25rem 0;">Reservation ID: <span id="confirmation-id" data-testid="confirmation-id" class="confirmation-id-badge"></span></p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const CONFIG_BACKEND = "__CONFIG_BACKEND_URL__";
+    const API_BASE = (CONFIG_BACKEND && !CONFIG_BACKEND.includes("__CONFIG_"))
+      ? CONFIG_BACKEND
+      : `${window.location.protocol}//${window.location.hostname}:8000`;
+
+    let selectedFlightId = null;
+
+    const searchBtn = document.getElementById("search-submit");
+    const flightsContainer = document.getElementById("flights-container");
+    const resultsSection = document.getElementById("results-section");
+    const bookingSection = document.getElementById("booking-section");
+    const confirmationSection = document.getElementById("confirmation-section");
+    const searchError = document.getElementById("search-error");
+    const bookingError = document.getElementById("booking-error");
+
+    searchBtn.addEventListener("click", async () => {
+      searchError.classList.add("hidden");
+      bookingSection.classList.add("hidden");
+      confirmationSection.classList.add("hidden");
+      flightsContainer.innerHTML = "";
+
+      const origin = document.getElementById("search-origin").value.trim();
+      const destination = document.getElementById("search-destination").value.trim();
+      const date = document.getElementById("search-date").value.trim();
+
+      try {
+        const url = new URL(`${API_BASE}/flights/search`);
+        url.searchParams.set("origin", origin);
+        url.searchParams.set("destination", destination);
+        url.searchParams.set("date", date);
+
+        const resp = await fetch(url.toString());
+        if (!resp.ok) {
+          throw new Error(`Search failed (HTTP ${resp.status})`);
+        }
+        const flights = await resp.json();
+        resultsSection.classList.remove("hidden");
+
+        if (!flights || flights.length === 0) {
+          flightsContainer.innerHTML = "<p>No flights found for the selected route and date.</p>";
+          return;
+        }
+
+        flights.forEach((f) => {
+          const row = document.createElement("div");
+          row.className = "flight-row";
+          row.setAttribute("data-testid", "flight-row");
+
+          const priceUsd = (f.price_cents / 100).toFixed(2);
+          row.innerHTML = `
+            <div class="flight-info">
+              <span class="badge">${f.flight_id}</span>
+              <strong>${f.route}</strong>
+              <span>Date: ${f.flight_date}</span>
+              <span>Seats Left: <strong>${f.seats_available}</strong></span>
+              <span>Price: <strong>$${priceUsd}</strong></span>
+            </div>
+          `;
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.setAttribute("data-testid", "reserve-button");
+          btn.textContent = "Reserve";
+          btn.addEventListener("click", () => {
+            selectedFlightId = f.flight_id;
+            document.getElementById("selected-flight-label").textContent =
+              `Booking Flight ${f.flight_id} (${f.route} on ${f.flight_date})`;
+            bookingError.classList.add("hidden");
+            bookingSection.classList.remove("hidden");
+            document.getElementById("passenger-name").focus();
+          });
+
+          row.appendChild(btn);
+          flightsContainer.appendChild(row);
+        });
+      } catch (err) {
+        searchError.textContent = err.message;
+        searchError.classList.remove("hidden");
+      }
+    });
+
+    document.getElementById("confirm-submit").addEventListener("click", async () => {
+      if (!selectedFlightId) return;
+      bookingError.classList.add("hidden");
+      const passengerName = document.getElementById("passenger-name").value.trim();
+      const fareClass = document.getElementById("fare-class").value;
+
+      try {
+        const resp = await fetch(`${API_BASE}/reservations`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            flight_id: selectedFlightId,
+            passenger_name: passengerName || "Guest Passenger",
+            fare_class: fareClass
+          })
+        });
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.detail || `Reservation failed (HTTP ${resp.status})`);
+        }
+        const data = await resp.json();
+        const cidEl = document.getElementById("confirmation-id");
+        cidEl.textContent = data.reservation_id;
+        confirmationSection.classList.remove("hidden");
+      } catch (err) {
+        bookingError.textContent = err.message;
+        bookingError.classList.remove("hidden");
+      }
+    });
+  </script>
+</body>
+</html>

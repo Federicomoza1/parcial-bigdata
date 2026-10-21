@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Managerial Analytics Panel - Route Occupancy</title>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header a { color: #93c5fd; text-decoration: none; font-weight: 500; }
+    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    h2 { margin-top: 0; font-size: 1.25rem; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
+    }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 0.35rem; }
+    input {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.65rem 1.2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: var(--accent-hover); }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .metric-box {
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .metric-label { font-size: 0.85rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .metric-val { font-size: 2rem; font-weight: 800; color: var(--primary); margin-top: 0.35rem; }
+    .error-msg { color: var(--danger); margin-top: 0.75rem; font-weight: 500; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>AeroAndes</strong> | Managerial Analytics Panel (Athena + Glue)</div>
+    <nav><a href="/">&larr; Customer Booking Portal</a></nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Historical Route Occupancy Query</h2>
+      <div class="form-grid">
+        <div>
+          <label for="manager-route">Route (e.g. BOG-MDE)</label>
+          <input id="manager-route" data-testid="manager-route" type="text" placeholder="BOG-MDE" />
+        </div>
+        <div>
+          <label for="manager-month">Month (YYYY-MM)</label>
+          <input id="manager-month" data-testid="manager-month" type="text" placeholder="2023-06" />
+        </div>
+        <div>
+          <button id="manager-load" data-testid="manager-load" type="button">Load Occupancy</button>
+        </div>
+      </div>
+      <div id="manager-error" class="error-msg hidden"></div>
+
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="metric-label">Occupancy Rate</div>
+          <div id="occupancy-value" data-testid="occupancy-value" class="metric-val"></div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Confirmed Seats Sold</div>
+          <div id="seats-sold-value" class="metric-val">-</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Total Seat Capacity</div>
+          <div id="seats-capacity-value" class="metric-val">-</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const CONFIG_BACKEND = "__CONFIG_BACKEND_URL__";
+    const API_BASE = (CONFIG_BACKEND && !CONFIG_BACKEND.includes("__CONFIG_"))
+      ? CONFIG_BACKEND
+      : `${window.location.protocol}//${window.location.hostname}:8000`;
+
+    const loadBtn = document.getElementById("manager-load");
+    const occEl = document.getElementById("occupancy-value");
+    const soldEl = document.getElementById("seats-sold-value");
+    const capEl = document.getElementById("seats-capacity-value");
+    const errEl = document.getElementById("manager-error");
+
+    loadBtn.addEventListener("click", async () => {
+      errEl.classList.add("hidden");
+      occEl.textContent = "";
+      soldEl.textContent = "-";
+      capEl.textContent = "-";
+
+      const route = document.getElementById("manager-route").value.trim();
+      const month = document.getElementById("manager-month").value.trim();
+
+      try {
+        const url = new URL(`${API_BASE}/analytics/occupancy`);
+        url.searchParams.set("route", route);
+        url.searchParams.set("month", month);
+
+        const resp = await fetch(url.toString());
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.detail || `Failed to load analytics (HTTP ${resp.status})`);
+        }
+        const data = await resp.json();
+        const pct = (Number(data.occupancy) * 100).toFixed(2) + "%";
+        occEl.textContent = pct;
+        soldEl.textContent = data.seats_sold;
+        capEl.textContent = data.seats_capacity;
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove("hidden");
+      }
+    });
+  </script>
+</body>
+</html>

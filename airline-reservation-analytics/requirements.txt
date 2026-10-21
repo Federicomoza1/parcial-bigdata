@@ -1,0 +1,11 @@
+pytest
+httpx
+pyyaml
+boto3
+pandas
+pyarrow
+numpy
+playwright
+fastapi
+uvicorn[standard]
+psycopg2-binary

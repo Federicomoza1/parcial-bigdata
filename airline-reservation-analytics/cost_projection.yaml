@@ -1,0 +1,6 @@
+assumptions: "500 daily users, ~5,000 requests/day, 2M historical reservation rows (~120 MB raw CSV, ~25 MB Snappy Parquet partitioned by month), 1 monthly EMR batch run."
+line_items:
+  - {service: "EC2", detail: "t3.small single instance hosting backend + frontend + transactional DB", monthly_usd: 15.18}
+  - {service: "EMR", detail: "1 run per month, 3 x m4.large transient cluster with auto-termination (~0.5h)", monthly_usd: 0.54}
+  - {service: "S3", detail: "Raw CSV + Curated Parquet storage and Athena query results (< 5 GB)", monthly_usd: 0.15}
+  - {service: "Athena", detail: "Partitioned Parquet managerial panel queries (< 10 GB scanned/month)", monthly_usd: 0.05}
