@@ -1,167 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Managerial Analytics Panel - Route Occupancy</title>
-  <style>
-    :root {
-      --primary: #0f172a;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --muted: #64748b;
-      --danger: #dc2626;
-    }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); }
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header a { color: #93c5fd; text-decoration: none; font-weight: 500; }
-    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    h2 { margin-top: 0; font-size: 1.25rem; }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      align-items: end;
-    }
-    label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 0.35rem; }
-    input {
-      width: 100%;
-      padding: 0.6rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.95rem;
-    }
-    button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 0.65rem 1.2rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    button:hover { background: var(--accent-hover); }
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-top: 1.25rem;
-    }
-    .metric-box {
-      background: #f1f5f9;
-      border-radius: 8px;
-      padding: 1.25rem;
-      text-align: center;
-    }
-    .metric-label { font-size: 0.85rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
-    .metric-val { font-size: 2rem; font-weight: 800; color: var(--primary); margin-top: 0.35rem; }
-    .error-msg { color: var(--danger); margin-top: 0.75rem; font-weight: 500; }
-    .hidden { display: none !important; }
-  </style>
+  <title>AeroAndes · Panel gerencial</title>
+  <meta name="description" content="Ocupación histórica por ruta y mes, consultada en Amazon Athena." />
+  <meta name="theme-color" content="#10161f" />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,300;125,500;125,600&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/base.css?v=4" />
+  <link rel="stylesheet" href="/assets/css/manager.css?v=4" />
 </head>
-<body>
-  <header>
-    <div><strong>AeroAndes</strong> | Managerial Analytics Panel (Athena + Glue)</div>
-    <nav><a href="/">&larr; Customer Booking Portal</a></nav>
+<body class="dash">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="logo" viewBox="0 0 40 40">
+      <rect width="40" height="40" rx="12" fill="#B8734F" />
+      <path d="M7 30 17 11l5.5 10 3.5-5.5L34 30z" fill="#18202F" />
+      <path d="M5.5 25.5C14 22 24 20.5 35 14" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" />
+    </symbol>
+  </svg>
+
+  <header class="site-header">
+    <div class="container bar">
+      <a class="brand" href="/" aria-label="AeroAndes, inicio">
+        <svg class="logo-mark"><use href="#logo" /></svg>
+        <span>AeroAndes<small>Gerencia</small></span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav-link" href="/manager" aria-current="page">Ocupación</a>
+        <a class="nav-link" href="#tendencia">Tendencia</a>
+        <a class="btn btn-light" href="/">Portal de clientes</a>
+      </nav>
+    </div>
   </header>
 
-  <main>
-    <div class="card">
-      <h2>Historical Route Occupancy Query</h2>
-      <div class="form-grid">
-        <div>
-          <label for="manager-route">Route (e.g. BOG-MDE)</label>
-          <input id="manager-route" data-testid="manager-route" type="text" placeholder="BOG-MDE" />
-        </div>
-        <div>
-          <label for="manager-month">Month (YYYY-MM)</label>
-          <input id="manager-month" data-testid="manager-month" type="text" placeholder="2023-06" />
-        </div>
-        <div>
-          <button id="manager-load" data-testid="manager-load" type="button">Load Occupancy</button>
-        </div>
+  <main class="container">
+    <div class="page-head">
+      <div>
+        <span class="eyebrow">Informe gerencial</span>
+        <h1>Ocupación <em>por ruta</em></h1>
       </div>
-      <div id="manager-error" class="error-msg hidden"></div>
+      <div class="meta">
+        <div>Historial<b>2023 – 2024</b></div>
+        <div>Fuente<b>Amazon Athena</b></div>
+      </div>
+    </div>
 
-      <div class="metrics-grid">
-        <div class="metric-box">
-          <div class="metric-label">Occupancy Rate</div>
-          <div id="occupancy-value" data-testid="occupancy-value" class="metric-val"></div>
+    <div class="dash-grid">
+      <!-- ======================================================= QUERY -->
+      <section class="tile query-tile" aria-labelledby="query-title">
+        <span class="tile-label">Consulta</span>
+        <h2 id="query-title">¿Qué tanto llenó sus aviones una ruta en un mes?</h2>
+        <p class="lead">Elige la ruta y el mes. El dato se consulta en vivo en Athena sobre el historial procesado.</p>
+
+        <form class="query-form" id="query-form" novalidate autocomplete="off">
+          <div class="dfield">
+            <label for="manager-route">Ruta</label>
+            <input id="manager-route" data-testid="manager-route" type="text" placeholder="BOG-MDE" maxlength="20" spellcheck="false" />
+            <span class="sub" id="route-sub">Origen-Destino, ej. BOG-MDE</span>
+          </div>
+          <div class="dfield">
+            <label for="manager-month">Mes</label>
+            <input id="manager-month" data-testid="manager-month" type="month" min="2023-01" max="2024-12" />
+            <span class="sub" id="month-sub">Historial: ene 2023 – dic 2024</span>
+          </div>
+          <button id="manager-load" data-testid="manager-load" class="btn btn-accent" type="submit">
+            <span class="btn-icon-slot" data-icon="search"></span><span class="btn-label">Consultar</span>
+          </button>
+        </form>
+        <div id="manager-error" class="alert query-error hidden" role="alert"></div>
+        <div class="recent" id="recent"></div>
+      </section>
+
+      <!-- =================================================== DATA FLOW -->
+      <aside class="tile flow-tile" aria-labelledby="flow-title">
+        <img src="/assets/img/manager-wing.jpg" alt="" />
+        <div class="body">
+          <span class="tile-label" id="flow-title">Origen de los datos</span>
+          <div class="big">≈2M<small>reservas</small></div>
+          <p>24 meses de historial, limpiados y agregados en lote.</p>
+          <ol class="flow">
+            <li><b>S3</b><span>CSV crudo</span></li>
+            <li><b>EMR · PySpark</b><span>reglas C1–C5</span></li>
+            <li><b>S3 · Parquet</b><span>partición por mes</span></li>
+            <li><b>Glue</b><span>catálogo de tablas</span></li>
+            <li><b>Athena</b><span>consulta SQL</span></li>
+          </ol>
         </div>
-        <div class="metric-box">
-          <div class="metric-label">Confirmed Seats Sold</div>
-          <div id="seats-sold-value" class="metric-val">-</div>
+      </aside>
+
+      <!-- ======================================================= GAUGE -->
+      <section class="tile t-warm gauge-tile" aria-labelledby="gauge-title" aria-live="polite">
+        <div class="tile-head">
+          <div>
+            <span class="tile-label">Ocupación del mes</span>
+            <h3 id="gauge-title">Sin consulta</h3>
+            <span class="month" id="gauge-month">Elige una ruta y un mes</span>
+          </div>
+          <span class="status-pill hidden" id="status-pill"></span>
         </div>
-        <div class="metric-box">
-          <div class="metric-label">Total Seat Capacity</div>
-          <div id="seats-capacity-value" class="metric-val">-</div>
+        <div class="gauge">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <linearGradient id="gauge-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#b8734f" />
+                <stop offset="100%" stop-color="#8f5233" />
+              </linearGradient>
+            </defs>
+            <circle class="track" cx="100" cy="100" r="86" fill="none" stroke-width="7" />
+            <circle class="ticks" cx="100" cy="100" r="74" fill="none" stroke-width="4" stroke-dasharray="0.8 10.83" />
+            <circle class="value-arc" id="gauge-arc" cx="100" cy="100" r="86" fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="540.35" stroke-dashoffset="540.35" />
+          </svg>
+          <div class="center">
+            <div id="occupancy-value" data-testid="occupancy-value" class="occupancy-value is-empty">—</div>
+            <div class="cap">Ocupación</div>
+          </div>
+          <div class="loading hidden" id="gauge-loading"><div class="ring-spinner"></div></div>
         </div>
-      </div>
+        <p class="gauge-foot" id="gauge-foot"><span>Sillas confirmadas ÷ capacidad de los vuelos del mes</span></p>
+      </section>
+
+      <!-- ======================================================== KPIs -->
+      <section class="tile t-slate kpi-tile" aria-label="Indicadores">
+        <div class="kpi">
+          <span class="tile-label">Sillas vendidas</span>
+          <div class="num is-empty" id="seats-sold-value">—</div>
+          <p>Reservas confirmadas</p>
+        </div>
+        <div class="kpi">
+          <span class="tile-label">Capacidad</span>
+          <div class="num is-empty" id="seats-capacity-value">—</div>
+          <p>Sillas ofrecidas en el mes</p>
+        </div>
+        <div class="kpi">
+          <span class="tile-label">Sillas vacías</span>
+          <div class="num is-empty" id="seats-empty-value">—</div>
+          <p>Capacidad sin vender</p>
+        </div>
+      </section>
+
+      <!-- ===================================================== SEAT MAP -->
+      <section class="tile t-mist seats-tile" aria-labelledby="seats-title">
+        <div class="tile-head">
+          <span class="tile-label" id="seats-title">Así se ve en la cabina</span>
+          <span class="glyph" data-icon="seat"></span>
+        </div>
+        <div class="seat-map" id="seat-map" role="img" aria-label="Mapa de 100 sillas"></div>
+        <p class="caption" id="seat-caption">De cada <b>100</b> sillas, ¿cuántas volaron ocupadas?</p>
+        <div class="legend"><span><i class="on"></i>Ocupada</span><span><i></i>Vacía</span></div>
+      </section>
+
+      <!-- ========================================================= META -->
+      <section class="tile meta-tile" aria-label="Detalles de la consulta">
+        <div class="tile-head">
+          <span class="tile-label">Respuesta de Athena</span>
+          <span class="glyph" data-icon="database"></span>
+        </div>
+        <div class="time" id="query-time">—</div>
+        <dl>
+          <div><dt>Tabla</dt><dd>route_month_metrics</dd></div>
+          <div><dt>Última consulta</dt><dd id="query-at">—</dd></div>
+        </dl>
+      </section>
+
+      <!-- ======================================================== TREND -->
+      <section class="tile trend-tile" id="tendencia" aria-labelledby="trend-title">
+        <div class="trend-head">
+          <div>
+            <span class="tile-label">Tendencia anual</span>
+            <h3 id="trend-title">Ocupación mes a mes</h3>
+            <p id="trend-sub">Consulta una ruta para ver su comportamiento durante todo el año.</p>
+          </div>
+          <button class="btn btn-ghost" type="button" id="trend-load" disabled>
+            <span class="btn-icon-slot" data-icon="chart"></span><span class="btn-label">Ver tendencia del año</span>
+          </button>
+        </div>
+        <div class="trend-empty" id="trend-empty">La tendencia ejecuta una consulta a Athena por cada mes del año seleccionado.</div>
+        <div class="chart hidden" id="chart"></div>
+      </section>
     </div>
   </main>
 
-  <script>
-    const CONFIG_BACKEND = "__CONFIG_BACKEND_URL__";
-    const API_BASE = (CONFIG_BACKEND && !CONFIG_BACKEND.includes("__CONFIG_"))
-      ? CONFIG_BACKEND
-      : `${window.location.protocol}//${window.location.hostname}:8000`;
+  <footer class="site-footer">
+    <div class="container">
+      <div class="legal">
+        <span>© 2026 AeroAndes · Panel gerencial. Proyecto académico, Big Data e Ingeniería de Datos.</span>
+        <span class="credits">Foto: Pamela Webb vía StockSnap (CC0).</span>
+      </div>
+    </div>
+  </footer>
 
-    const loadBtn = document.getElementById("manager-load");
-    const occEl = document.getElementById("occupancy-value");
-    const soldEl = document.getElementById("seats-sold-value");
-    const capEl = document.getElementById("seats-capacity-value");
-    const errEl = document.getElementById("manager-error");
-
-    loadBtn.addEventListener("click", async () => {
-      errEl.classList.add("hidden");
-      occEl.textContent = "";
-      soldEl.textContent = "-";
-      capEl.textContent = "-";
-
-      const route = document.getElementById("manager-route").value.trim();
-      const month = document.getElementById("manager-month").value.trim();
-
-      try {
-        const url = new URL(`${API_BASE}/analytics/occupancy`);
-        url.searchParams.set("route", route);
-        url.searchParams.set("month", month);
-
-        const resp = await fetch(url.toString());
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.detail || `Failed to load analytics (HTTP ${resp.status})`);
-        }
-        const data = await resp.json();
-        const pct = (Number(data.occupancy) * 100).toFixed(2) + "%";
-        occEl.textContent = pct;
-        soldEl.textContent = data.seats_sold;
-        capEl.textContent = data.seats_capacity;
-      } catch (err) {
-        errEl.textContent = err.message;
-        errEl.classList.remove("hidden");
-      }
-    });
-  </script>
+  <script>window.AEROANDES_BACKEND = "__CONFIG_BACKEND_URL__";</script>
+  <script src="/assets/js/common.js?v=4"></script>
+  <script src="/assets/js/manager.js?v=4"></script>
 </body>
 </html>

@@ -1,279 +1,279 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Airline Reservation System - Customer Portal</title>
-  <style>
-    :root {
-      --primary: #0f172a;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --muted: #64748b;
-      --success: #059669;
-      --danger: #dc2626;
-    }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); }
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header a { color: #93c5fd; text-decoration: none; font-weight: 500; }
-    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    h2 { margin-top: 0; font-size: 1.25rem; }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      align-items: end;
-    }
-    label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 0.35rem; }
-    input, select {
-      width: 100%;
-      padding: 0.6rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.95rem;
-    }
-    button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 0.65rem 1.2rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    button:hover { background: var(--accent-hover); }
-    .flight-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-top: 0.75rem;
-      background: #fff;
-    }
-    .flight-info { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
-    .badge {
-      background: #eff6ff;
-      color: var(--accent);
-      padding: 0.25rem 0.6rem;
-      border-radius: 4px;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-    .hidden { display: none !important; }
-    .confirmation-box {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      color: #065f46;
-      padding: 1.25rem;
-      border-radius: 8px;
-    }
-    .confirmation-id-badge {
-      font-family: monospace;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--success);
-    }
-    .error-msg { color: var(--danger); margin-top: 0.75rem; font-weight: 500; }
-  </style>
+  <title>AeroAndes · Vuela los Andes</title>
+  <meta name="description" content="Reserva vuelos directos entre las 12 ciudades de la red AeroAndes en Colombia." />
+  <meta name="theme-color" content="#18202f" />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="/assets/img/hero-747.jpg" />
+  <link rel="stylesheet" href="/assets/css/base.css?v=3" />
+  <link rel="stylesheet" href="/assets/css/portal.css?v=3" />
 </head>
 <body>
-  <header>
-    <div><strong>AeroAndes</strong> | Flight Reservations</div>
-    <nav><a href="/manager">Manager Analytics Panel &rarr;</a></nav>
+  <!-- Logo symbol (Andes peaks + flight path) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="logo" viewBox="0 0 40 40">
+      <rect width="40" height="40" rx="12" fill="#B8734F" />
+      <path d="M7 30 17 11l5.5 10 3.5-5.5L34 30z" fill="#18202F" />
+      <path d="M5.5 25.5C14 22 24 20.5 35 14" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" />
+    </symbol>
+  </svg>
+
+  <header class="site-header">
+    <div class="container bar">
+      <a class="brand" href="/" aria-label="AeroAndes, inicio">
+        <svg class="logo-mark"><use href="#logo" /></svg>
+        <span>AeroAndes<small>Colombia</small></span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav-link" href="#buscar">Vuelos</a>
+        <a class="nav-link" href="#destinos">Destinos</a>
+        <a class="nav-link" href="#buscar" data-open-lookup>Mi reserva</a>
+        <a class="btn btn-light" href="/manager">Panel gerencial</a>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <div class="card">
-      <h2>Search Flights</h2>
-      <div class="form-grid">
-        <div>
-          <label for="search-origin">Origin (IATA)</label>
-          <input id="search-origin" data-testid="search-origin" type="text" placeholder="BOG" />
+    <!-- ============================================================ HERO -->
+    <div class="hero-shell">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-media" role="img" aria-label="Avión de pasajeros aterrizando al atardecer"></div>
+
+        <div class="hero-content">
+          <div>
+            <span class="kicker">Aerolínea colombiana · 12 destinos</span>
+            <h1 id="hero-title">Vuela<br /><span class="outline">los</span> <span class="accent">Andes</span></h1>
+            <p class="hero-lead">Vuelos directos entre las 12 ciudades de nuestra red. Reserva en segundos: tu silla queda garantizada desde el momento en que confirmas.</p>
+            <div class="hero-badges" aria-label="AeroAndes en cifras">
+              <span><i data-icon="plane"></i>12 destinos nacionales</span>
+              <span><i data-icon="shield"></i>0 sobreventas</span>
+              <span><i data-icon="bolt"></i>Confirmación inmediata</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <label for="search-destination">Destination (IATA)</label>
-          <input id="search-destination" data-testid="search-destination" type="text" placeholder="MDE" />
+
+        <!-- ======================================================= SEARCH -->
+        <div class="search-dock" id="buscar">
+          <div class="search-card">
+            <div class="tabs" role="tablist" aria-label="¿Qué quieres hacer?">
+              <button class="tab" role="tab" id="tab-book" aria-selected="true" aria-controls="panel-book" type="button" data-icon="plane">Reservar vuelo</button>
+              <button class="tab" role="tab" id="tab-lookup" aria-selected="false" aria-controls="panel-lookup" type="button" data-icon="ticket">Mi reserva</button>
+              <span class="tab-hint">Solo ida · 1 pasajero por reserva</span>
+            </div>
+
+            <form id="panel-book" role="tabpanel" aria-labelledby="tab-book" novalidate autocomplete="off">
+              <div class="search-grid">
+                <div class="field" data-airport-field>
+                  <label for="search-origin">Desde</label>
+                  <input id="search-origin" data-testid="search-origin" type="text" placeholder="Origen" maxlength="40"
+                         role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest-origin" spellcheck="false" />
+                  <span class="sub" id="origin-sub">Ciudad o código</span>
+                  <ul class="suggest hidden" id="suggest-origin" role="listbox" aria-label="Aeropuertos de origen"></ul>
+                </div>
+
+                <button class="swap" type="button" id="swap-btn" aria-label="Intercambiar origen y destino"></button>
+
+                <div class="field" data-airport-field>
+                  <label for="search-destination">Hacia</label>
+                  <input id="search-destination" data-testid="search-destination" type="text" placeholder="Destino" maxlength="40"
+                         role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest-destination" spellcheck="false" />
+                  <span class="sub" id="destination-sub">Ciudad o código</span>
+                  <ul class="suggest hidden" id="suggest-destination" role="listbox" aria-label="Aeropuertos de destino"></ul>
+                </div>
+
+                <div class="field field-date">
+                  <label for="search-date">Fecha de salida</label>
+                  <input id="search-date" data-testid="search-date" type="date" />
+                  <span class="sub" id="date-sub">Elige el día de tu vuelo</span>
+                </div>
+
+                <button class="btn btn-accent search-btn" id="search-submit" data-testid="search-submit" type="submit">
+                  <span class="btn-icon-slot" data-icon="search"></span><span class="btn-label">Buscar</span>
+                </button>
+              </div>
+              <div id="search-error" class="alert alert-error search-error hidden" role="alert"></div>
+            </form>
+
+            <form id="panel-lookup" role="tabpanel" aria-labelledby="tab-lookup" class="hidden" novalidate autocomplete="off">
+              <div class="lookup-grid">
+                <div class="field">
+                  <label for="lookup-code">Código de reserva</label>
+                  <input id="lookup-code" type="text" placeholder="R1A2B3C4D5E6" maxlength="64" spellcheck="false" />
+                  <span class="sub">Lo encuentras en tu pase de reserva</span>
+                </div>
+                <button class="btn btn-dark search-btn" id="lookup-submit" type="submit">
+                  <span class="btn-icon-slot" data-icon="search"></span><span class="btn-label">Consultar</span>
+                </button>
+              </div>
+              <div id="lookup-error" class="alert alert-error search-error hidden" role="alert"></div>
+            </form>
+          </div>
         </div>
-        <div>
-          <label for="search-date">Flight Date (YYYY-MM-DD)</label>
-          <input id="search-date" data-testid="search-date" type="text" placeholder="2031-05-20" />
-        </div>
-        <div>
-          <button id="search-submit" data-testid="search-submit" type="button">Search Flights</button>
-        </div>
-      </div>
-      <div id="search-error" class="error-msg hidden"></div>
+      </section>
     </div>
 
-    <div id="results-section" class="card hidden">
-      <h2>Available Flights</h2>
-      <div id="flights-container"></div>
-    </div>
+    <!-- ========================================================= RESULTS -->
+    <section id="results-section" class="results container hidden" aria-live="polite">
+      <div class="results-head">
+        <div>
+          <span class="results-kicker" id="results-kicker">Vuelos disponibles</span>
+          <h2 id="results-title"></h2>
+        </div>
+        <span class="meta" id="results-meta"></span>
+      </div>
+      <div id="flights-container" class="results-list"></div>
+    </section>
 
-    <div id="booking-section" class="card hidden">
-      <h2>Complete Your Reservation</h2>
-      <p id="selected-flight-label" style="color: var(--muted); margin-top: 0;"></p>
-      <div class="form-grid">
+    <!-- ===================================================== DESTINATIONS -->
+    <section class="destinations container" id="destinos" aria-labelledby="dest-title">
+      <div class="section-head reveal">
         <div>
-          <label for="passenger-name">Passenger Full Name</label>
-          <input id="passenger-name" data-testid="passenger-name" type="text" placeholder="Jane Doe" />
+          <span class="kicker">Destinos</span>
+          <h2 id="dest-title">Colombia te espera</h2>
         </div>
-        <div>
-          <label for="fare-class">Fare Class</label>
-          <select id="fare-class">
-            <option value="ECONOMY">ECONOMY</option>
-            <option value="BUSINESS">BUSINESS</option>
-          </select>
+        <p>Del Caribe a las montañas: elige un destino y te llevamos directo a la búsqueda.</p>
+      </div>
+      <div class="bento reveal">
+        <button class="dest big" type="button" data-dest="ADZ">
+          <img src="/assets/img/dest-san-andres.jpg" alt="Playa de arena blanca y mar turquesa en Cayo Bolívar, San Andrés" loading="lazy" />
+          <span class="code">ADZ</span><span class="go" data-icon="arrow"></span>
+          <span class="info"><span class="name">San Andrés</span><span class="note">El mar de los siete colores</span></span>
+        </button>
+        <button class="dest" type="button" data-dest="CTG">
+          <img src="/assets/img/dest-cartagena.jpg" alt="Cúpulas de la ciudad amurallada de Cartagena al atardecer" loading="lazy" style="object-position: 30% 50%" />
+          <span class="code">CTG</span><span class="go" data-icon="arrow"></span>
+          <span class="info"><span class="name">Cartagena</span><span class="note">Ciudad amurallada</span></span>
+        </button>
+        <button class="dest" type="button" data-dest="SMR">
+          <img src="/assets/img/dest-santa-marta.jpg" alt="Bahía de Taganga en Santa Marta" loading="lazy" />
+          <span class="code">SMR</span><span class="go" data-icon="arrow"></span>
+          <span class="info"><span class="name">Santa Marta</span><span class="note">Sierra Nevada y mar</span></span>
+        </button>
+        <button class="dest" type="button" data-dest="MDE">
+          <img src="/assets/img/dest-medellin.jpg" alt="Vista aérea del embalse de Guatapé, Antioquia" loading="lazy" />
+          <span class="code">MDE</span><span class="go" data-icon="arrow"></span>
+          <span class="info"><span class="name">Medellín</span><span class="note">Puerta a Guatapé</span></span>
+        </button>
+        <button class="dest" type="button" data-dest="BOG">
+          <img src="/assets/img/dest-bogota.jpg" alt="Panorámica de Bogotá con los cerros orientales" loading="lazy" />
+          <span class="code">BOG</span><span class="go" data-icon="arrow"></span>
+          <span class="info"><span class="name">Bogotá</span><span class="note">La capital a 2.600 m</span></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================= FEATURES -->
+    <section class="features container" aria-label="Por qué volar con AeroAndes">
+      <div class="feature-band reveal">
+        <div class="feature dark">
+          <div>
+            <h3>Reservar no debería ser complicado</h3>
+            <p>Busca, elige y confirma en tres pasos. Sin cuentas, sin letra pequeña.</p>
+          </div>
+          <a class="btn btn-accent" href="#buscar" data-focus-search>Empezar ahora</a>
         </div>
-        <div>
-          <button id="confirm-submit" data-testid="confirm-submit" type="button">Confirm Reservation</button>
+        <div class="feature">
+          <div class="icon" data-icon="shield"></div>
+          <h3>Tu silla, garantizada</h3>
+          <p>Aunque cientos de personas reserven al mismo tiempo, cada silla se vende una sola vez.</p>
+        </div>
+        <div class="feature">
+          <div class="icon" data-icon="bolt"></div>
+          <h3>Confirmación inmediata</h3>
+          <p>Recibes tu código de reserva en el instante en que confirmas.</p>
+        </div>
+        <div class="feature">
+          <div class="icon" data-icon="ticket"></div>
+          <h3>Tu reserva, a mano</h3>
+          <p>Consulta el estado de tu reserva cuando quieras con tu código.</p>
         </div>
       </div>
-      <div id="booking-error" class="error-msg hidden"></div>
-    </div>
-
-    <div id="confirmation-section" class="card hidden">
-      <div class="confirmation-box">
-        <h2 style="margin-bottom: 0.5rem;">Reservation Confirmed!</h2>
-        <p style="margin: 0.25rem 0;">Reservation ID: <span id="confirmation-id" data-testid="confirmation-id" class="confirmation-id-badge"></span></p>
-      </div>
-    </div>
+    </section>
   </main>
 
-  <script>
-    const CONFIG_BACKEND = "__CONFIG_BACKEND_URL__";
-    const API_BASE = (CONFIG_BACKEND && !CONFIG_BACKEND.includes("__CONFIG_"))
-      ? CONFIG_BACKEND
-      : `${window.location.protocol}//${window.location.hostname}:8000`;
+  <footer class="site-footer">
+    <div class="container">
+      <div class="cols">
+        <div>
+          <a class="brand" href="/"><svg class="logo-mark"><use href="#logo" /></svg><span>AeroAndes<small>Colombia</small></span></a>
+          <p class="tagline">Conectamos las 12 ciudades de nuestra red con vuelos directos y reservas que nunca se sobrevenden.</p>
+        </div>
+        <div>
+          <h4>Vuela</h4>
+          <ul>
+            <li><a href="#buscar" data-focus-search>Reservar un vuelo</a></li>
+            <li><a href="#buscar" data-open-lookup>Consultar mi reserva</a></li>
+            <li><a href="#destinos">Destinos</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Empresa</h4>
+          <ul>
+            <li><a href="/manager">Panel gerencial de ocupación</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="legal">
+        <span>© 2026 AeroAndes · Proyecto académico, Big Data e Ingeniería de Datos. Aerolínea ficticia.</span>
+        <span class="credits">Fotos vía Wikimedia Commons: Jordi Cucurull (CC BY-SA 2.0, imagen reflejada), “...some guy” (CC BY 2.0), Peter Chovanec (CC BY 2.0), Vincent Lefèvre (CC BY 2.0), Henrr Pomares (CC0); rawpixel (CC0).</span>
+      </div>
+    </div>
+  </footer>
 
-    let selectedFlightId = null;
+  <!-- ===================================================== BOOKING SHEET -->
+  <dialog id="booking-dialog" class="sheet" aria-labelledby="booking-title">
+    <div class="sheet-head">
+      <h3 id="booking-title">Completa tu reserva</h3>
+      <button class="btn btn-icon" type="button" id="booking-close" aria-label="Cerrar" data-icon="close"></button>
+    </div>
 
-    const searchBtn = document.getElementById("search-submit");
-    const flightsContainer = document.getElementById("flights-container");
-    const resultsSection = document.getElementById("results-section");
-    const bookingSection = document.getElementById("booking-section");
-    const confirmationSection = document.getElementById("confirmation-section");
-    const searchError = document.getElementById("search-error");
-    const bookingError = document.getElementById("booking-error");
+    <form id="booking-section" class="sheet-body" novalidate autocomplete="off">
+      <div class="trip-summary" id="trip-summary"></div>
 
-    searchBtn.addEventListener("click", async () => {
-      searchError.classList.add("hidden");
-      bookingSection.classList.add("hidden");
-      confirmationSection.classList.add("hidden");
-      flightsContainer.innerHTML = "";
+      <div class="form-field">
+        <label for="passenger-name">Nombre completo del pasajero</label>
+        <input id="passenger-name" data-testid="passenger-name" class="text-input" type="text" placeholder="Como aparece en tu documento" maxlength="120" autocomplete="name" />
+      </div>
 
-      const origin = document.getElementById("search-origin").value.trim();
-      const destination = document.getElementById("search-destination").value.trim();
-      const date = document.getElementById("search-date").value.trim();
+      <div class="form-field" role="radiogroup" aria-labelledby="fare-label">
+        <span class="label" id="fare-label">Clase</span>
+        <div class="fare-options">
+          <div class="fare-option">
+            <input type="radio" name="fare" id="fare-economy" value="ECONOMY" checked />
+            <label for="fare-economy"><b>Económica</b><span>Equipaje de mano</span></label>
+          </div>
+          <div class="fare-option">
+            <input type="radio" name="fare" id="fare-business" value="BUSINESS" />
+            <label for="fare-business"><b>Business</b><span>Embarque prioritario</span></label>
+          </div>
+        </div>
+      </div>
 
-      try {
-        const url = new URL(`${API_BASE}/flights/search`);
-        url.searchParams.set("origin", origin);
-        url.searchParams.set("destination", destination);
-        url.searchParams.set("date", date);
+      <div class="price-row"><span>Total a pagar</span><strong id="booking-price"></strong></div>
+      <div id="booking-error" class="alert alert-error hidden" role="alert"></div>
+      <button id="confirm-submit" data-testid="confirm-submit" class="btn btn-accent btn-confirm" type="submit">
+        <span class="btn-label">Confirmar reserva</span>
+      </button>
+      <p class="fineprint">Al confirmar, la silla queda apartada a tu nombre de inmediato.</p>
+    </form>
 
-        const resp = await fetch(url.toString());
-        if (!resp.ok) {
-          throw new Error(`Search failed (HTTP ${resp.status})`);
-        }
-        const flights = await resp.json();
-        resultsSection.classList.remove("hidden");
+    <div id="confirmation-section" class="sheet-body hidden">
+      <div id="pass-slot"></div>
+      <div class="pass-actions">
+        <button class="btn btn-ghost" type="button" id="pass-close">Cerrar</button>
+        <button class="btn btn-dark" type="button" id="pass-new">Nueva búsqueda</button>
+      </div>
+    </div>
+  </dialog>
 
-        if (!flights || flights.length === 0) {
-          flightsContainer.innerHTML = "<p>No flights found for the selected route and date.</p>";
-          return;
-        }
-
-        flights.forEach((f) => {
-          const row = document.createElement("div");
-          row.className = "flight-row";
-          row.setAttribute("data-testid", "flight-row");
-
-          const priceUsd = (f.price_cents / 100).toFixed(2);
-          row.innerHTML = `
-            <div class="flight-info">
-              <span class="badge">${f.flight_id}</span>
-              <strong>${f.route}</strong>
-              <span>Date: ${f.flight_date}</span>
-              <span>Seats Left: <strong>${f.seats_available}</strong></span>
-              <span>Price: <strong>$${priceUsd}</strong></span>
-            </div>
-          `;
-
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.setAttribute("data-testid", "reserve-button");
-          btn.textContent = "Reserve";
-          btn.addEventListener("click", () => {
-            selectedFlightId = f.flight_id;
-            document.getElementById("selected-flight-label").textContent =
-              `Booking Flight ${f.flight_id} (${f.route} on ${f.flight_date})`;
-            bookingError.classList.add("hidden");
-            bookingSection.classList.remove("hidden");
-            document.getElementById("passenger-name").focus();
-          });
-
-          row.appendChild(btn);
-          flightsContainer.appendChild(row);
-        });
-      } catch (err) {
-        searchError.textContent = err.message;
-        searchError.classList.remove("hidden");
-      }
-    });
-
-    document.getElementById("confirm-submit").addEventListener("click", async () => {
-      if (!selectedFlightId) return;
-      bookingError.classList.add("hidden");
-      const passengerName = document.getElementById("passenger-name").value.trim();
-      const fareClass = document.getElementById("fare-class").value;
-
-      try {
-        const resp = await fetch(`${API_BASE}/reservations`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            flight_id: selectedFlightId,
-            passenger_name: passengerName || "Guest Passenger",
-            fare_class: fareClass
-          })
-        });
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.detail || `Reservation failed (HTTP ${resp.status})`);
-        }
-        const data = await resp.json();
-        const cidEl = document.getElementById("confirmation-id");
-        cidEl.textContent = data.reservation_id;
-        confirmationSection.classList.remove("hidden");
-      } catch (err) {
-        bookingError.textContent = err.message;
-        bookingError.classList.remove("hidden");
-      }
-    });
-  </script>
+  <script>window.AEROANDES_BACKEND = "__CONFIG_BACKEND_URL__";</script>
+  <script src="/assets/js/common.js?v=3"></script>
+  <script src="/assets/js/portal.js?v=3"></script>
 </body>
 </html>
